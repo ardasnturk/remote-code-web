@@ -1,7 +1,9 @@
 # Remote Code website
 
-Landing page and downloads for **Remote Code**, which drives Claude Code, Codex
-and Gemini on your Mac from your iPhone or iPad. English and Turkish.
+Landing page and downloads for **Remote Code**, the Mac menu bar app that runs
+Claude Code, Codex and Gemini, with an optional iPhone and iPad app. In the same
+ten languages as the apps: English, Türkçe, Deutsch, Español, Français,
+Italiano, Português (Brasil), 日本語, 한국어 and 简体中文.
 
 Live at **https://rcode.ardasnturk.com**
 
@@ -14,13 +16,19 @@ latest DMG.
 | File | |
 |---|---|
 | `index.html` | Page and English copy |
-| `i18n.js` | Turkish copy (keys match `data-i18n` in `index.html`) |
-| `main.js` | Language and theme switch, latest DMG, TestFlight QR, copy buttons |
-| `styles.css` | Styles, light and dark |
-| `assets/` | Icons, generated from the app repository |
+| `i18n/<lang>.js` | One file per language (keys match `data-i18n` in `index.html`) |
+| `main.js` | Language and theme switch, latest DMG, TestFlight QR, copy buttons, motion |
+| `styles.css` | Styles, dark and light; everything that moves stops under `prefers-reduced-motion` |
+| `assets/` | Icons and app screenshots, one set per language in `assets/shots/` |
 
-The page accepts `?lang=en` or `?lang=tr`; without it the saved choice, then
-the browser language is used.
+The page accepts `?lang=<code>` (`en`, `tr`, `de`, `es`, `fr`, `it`, `pt-BR`, `ja`,
+`ko`, `zh-Hans`); without it the saved choice, then the browser language is used.
+
+The Mac panel and window in the hero are HTML recreations of the app's menu and
+session monitor, playing a scripted session; their labels are the app's own
+strings. The iPhone images are real screenshots from the app's demo Mac. Avoid
+`backdrop-filter` outside the navigation: over the moving background it dropped
+the page to 1 frame per second.
 
 ## Settings
 
@@ -44,7 +52,8 @@ python3 -m http.server 8000
 
 Open <http://localhost:8000>.
 
-The icons come from the app repository (`docs/icon.png`) — never edit them here:
+The icons come from the app repository (`docs/icon.png`) and the plugin logos
+from their sites — never edit them here:
 
 ```bash
 scripts/sync-from-app.sh   # expects the app at ../remote-code, or REMOTECODE_APP=/path/to/remote-code

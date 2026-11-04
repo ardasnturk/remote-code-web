@@ -3,44 +3,89 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Remote Code — Drive your Mac's coding agents from your iPhone</title>
-  <meta name="description" content="Remote Code lets you drive Claude Code, Codex and Gemini on your Mac from your iPhone or iPad. End-to-end encrypted. No server, no account, no telemetry.">
-  <meta name="color-scheme" content="light dark">
-  <meta name="theme-color" content="#f6f8f9" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#0a1416" media="(prefers-color-scheme: dark)">
+  <title>Remote Code — The home of your coding agents on the Mac</title>
+  <meta name="description" content="Remote Code is a free Mac menu bar app that runs Claude Code, Codex and Gemini, with every chat, approval and limit in one place. Pair your iPhone or iPad to take it with you. End-to-end encrypted, with no server, account or telemetry.">
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#06080f" media="(prefers-color-scheme: dark)">
   <meta property="og:title" content="Remote Code">
-  <meta property="og:description" content="Drive Claude Code, Codex and Gemini on your Mac from your iPhone or iPad.">
+  <meta property="og:description" content="The home of your coding agents on the Mac. Free and open source, end-to-end encrypted.">
   <meta property="og:image" content="https://rcode.ardasnturk.com/assets/icon-512.png">
   <meta property="og:url" content="https://rcode.ardasnturk.com/">
   <link rel="canonical" href="https://rcode.ardasnturk.com/">
+  <link rel="alternate" hreflang="en" href="https://rcode.ardasnturk.com/?lang=en">
+  <link rel="alternate" hreflang="tr" href="https://rcode.ardasnturk.com/?lang=tr">
+  <link rel="alternate" hreflang="de" href="https://rcode.ardasnturk.com/?lang=de">
+  <link rel="alternate" hreflang="es" href="https://rcode.ardasnturk.com/?lang=es">
+  <link rel="alternate" hreflang="fr" href="https://rcode.ardasnturk.com/?lang=fr">
+  <link rel="alternate" hreflang="it" href="https://rcode.ardasnturk.com/?lang=it">
+  <link rel="alternate" hreflang="pt-BR" href="https://rcode.ardasnturk.com/?lang=pt-BR">
+  <link rel="alternate" hreflang="ja" href="https://rcode.ardasnturk.com/?lang=ja">
+  <link rel="alternate" hreflang="ko" href="https://rcode.ardasnturk.com/?lang=ko">
+  <link rel="alternate" hreflang="zh-Hans" href="https://rcode.ardasnturk.com/?lang=zh-Hans">
   <link rel="icon" type="image/png" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <link rel="stylesheet" href="styles.css">
   <script>
-    // Apply the saved theme before first paint to avoid a flash.
+    // Before first paint: the saved theme, and the class that hides elements waiting to animate in.
+    document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('ph-theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+    // The language too: its strings load before the body, so the page never flashes in English.
+    (function () {
+      var all = ['en', 'tr', 'de', 'es', 'fr', 'it', 'pt-BR', 'ja', 'ko', 'zh-Hans'];
+      function match(tag) {
+        tag = String(tag || '').toLowerCase();
+        for (var i = 0; i < all.length; i++) if (all[i].toLowerCase() === tag) return all[i];
+        if (/^zh/.test(tag)) return /hant|tw|hk|mo/.test(tag) ? null : 'zh-Hans';
+        var base = tag.split('-')[0];
+        return base === 'pt' ? 'pt-BR' : (all.indexOf(base) > -1 ? base : null);
+      }
+      var saved = null;
+      try { saved = localStorage.getItem('ph-lang'); } catch (e) {}
+      var wanted = [new URLSearchParams(location.search).get('lang'), saved].concat(navigator.languages || [navigator.language]);
+      var lang = 'en';
+      for (var i = 0; i < wanted.length; i++) { var m = match(wanted[i]); if (m) { lang = m; break; } }
+      window.PH_LANGS = all;
+      window.PH_LANG = lang;
+      window.PH_STRINGS = {};
+      if (lang !== 'en') document.write('<script src="i18n/' + lang + '.js"><\/script>');
+    })();
   </script>
 </head>
 <body>
   <a class="skip" href="#main" data-i18n="skip">Skip to content</a>
+  <div class="progress" id="progress" aria-hidden="true"></div>
 
   <header class="nav" id="top">
-    <div class="wrap nav-inner">
+    <div class="nav-inner">
       <a class="brand" href="#top" aria-label="Remote Code">
-        <img src="assets/favicon.png" width="32" height="32" alt="">
+        <img src="assets/favicon.png" width="30" height="30" alt="">
         <span>Remote Code</span>
       </a>
       <nav class="nav-links" aria-label="Sections" data-i18n-attr="aria-label:nav.label">
-        <a href="#features" data-i18n="nav.features">Features</a>
-        <a href="#how" data-i18n="nav.how">How it works</a>
+        <a href="#mac" data-i18n="nav.mac">Mac app</a>
+        <a href="#iphone" data-i18n="nav.iphone">iPhone &amp; iPad</a>
+        <a href="#plugins" data-i18n="nav.plugins">Plugins</a>
         <a href="#security" data-i18n="nav.security">Security</a>
         <a href="#faq" data-i18n="nav.faq">FAQ</a>
       </nav>
       <div class="nav-tools">
-        <div class="lang" role="group" aria-label="Language" data-i18n-attr="aria-label:lang.label">
-          <button type="button" data-lang="en" aria-pressed="true">EN</button>
-          <button type="button" data-lang="tr" aria-pressed="false">TR</button>
-        </div>
+        <label class="lang">
+          <span class="visually-hidden" data-i18n="lang.label">Language</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 3 2.8 15 0 18M12 3c-2.8 3-2.8 15 0 18"/></svg>
+          <select id="lang-select">
+            <option value="en">English</option>
+            <option value="tr">Türkçe</option>
+            <option value="de">Deutsch</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="it">Italiano</option>
+            <option value="pt-BR">Português (Brasil)</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="zh-Hans">简体中文</option>
+          </select>
+        </label>
         <button type="button" class="icon-btn" id="theme-toggle" aria-label="Switch theme" data-i18n-attr="aria-label:theme.toggle">
           <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
           <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
@@ -51,136 +96,272 @@
   </header>
 
   <main id="main">
-    <!-- Hero -->
+    <!-- Hero: the Mac app -->
     <section class="hero">
+      <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="grid-lines" aria-hidden="true"></div>
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="pill" data-i18n="hero.new">1.2 is here</span> <span data-i18n="hero.newText">New name, new icon</span></p>
-          <h1 data-i18n="hero.title">Drive the coding agents on your Mac <span class="grad-text">from your iPhone.</span></h1>
-          <p class="lead" data-i18n="hero.lead">Remote Code runs <b>Claude Code</b>, <b>Codex</b> and <b>Gemini</b> on your Mac and puts them in your pocket: start sessions in any project folder, follow every response, tool call and diff live, and approve or deny every action.</p>
-          <div class="cta-row">
-            <a class="btn btn-primary" href="#download">
+          <a class="news rv" href="#download">
+            <span class="news-tag" data-i18n="hero.new">For macOS</span>
+            <span data-i18n="hero.newText">A free, open-source menu bar app</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </a>
+          <h1 data-split data-i18n="hero.title">The home of your <em>coding agents</em> on the Mac.</h1>
+          <p class="lead rv" data-i18n="hero.lead">Remote Code runs <b>Claude Code</b>, <b>Codex</b> and <b>Gemini</b> on your Mac and keeps them in your menu bar: every chat, approval and usage limit in one place, on a Mac that stays awake and ready.</p>
+          <div class="cta-row rv">
+            <a class="btn btn-primary btn-large" href="#download" id="hero-mac">
               <svg viewBox="0 0 24 24" aria-hidden="true" class="i-apple"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.8-1.3z"/></svg>
               <span data-i18n="hero.ctaMac">Download for Mac</span>
             </a>
-            <a class="btn btn-ghost" href="#iphone" data-i18n="hero.ctaPhone">Get the iPhone app</a>
+            <a class="btn btn-ghost btn-large" href="#mac" data-i18n="hero.ctaMore">See what it does</a>
           </div>
-          <ul class="hero-facts">
+          <ul class="hero-facts rv">
             <li data-i18n="hero.fact1">End-to-end encrypted</li>
             <li data-i18n="hero.fact2">No server, no account</li>
             <li data-i18n="hero.fact3">No telemetry</li>
-            <li data-i18n="hero.fact4">Free</li>
+            <li data-i18n="hero.fact4">Free and open source</li>
           </ul>
         </div>
 
-        <!-- Screenshots of the iPhone app (demo Mac) -->
-        <div class="hero-art">
-          <div class="shots">
-            <figure class="shot shot-back"><img src="assets/shot-home.png" width="603" height="1311" alt="Remote Code on iPhone: the chats on your Mac and this week's summary" data-i18n-attr="alt:art.homeAlt"></figure>
-            <figure class="shot shot-front"><img src="assets/shot-chat.png" width="603" height="1311" alt="A chat with Claude Code: the reply, tool calls and the message field" data-i18n-attr="alt:art.chatAlt"></figure>
+        <!-- A recreation of the app's menu and session monitor, playing a scripted session -->
+        <div class="desk" id="desk" aria-hidden="true">
+          <div class="menubar">
+            <svg class="i-apple" viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.8-1.3z"/></svg>
+            <b>Remote Code</b>
+            <span class="menubar-right"><span class="menubar-icon">&gt;_</span><span>9:41</span></span>
+          </div>
+          <div class="window">
+            <div class="window-bar"><i></i><i></i><i></i><span data-i18n="mock.chatTitle">Fix the flaky login test</span></div>
+            <pre class="term-body" id="term"></pre>
+            <div class="reply"><span data-i18n="mock.reply">Reply to Claude</span><b data-i18n="mock.send">Send</b></div>
+          </div>
+          <div class="panel" id="panel">
+            <div class="panel-head">
+              <div class="panel-title">
+                <span class="panel-logo">&gt;_</span>
+                <div><b>Remote Code</b><span>MacBook Pro</span></div>
+                <em data-i18n="mock.ready">Ready</em>
+              </div>
+              <div class="panel-stats">
+                <div><b>1</b><span data-i18n="mock.connected">connected</span></div>
+                <div><b id="stat-working">0</b><span data-i18n="mock.working">working</span></div>
+                <div><b>3</b><span data-i18n="mock.open">open chats</span></div>
+              </div>
+            </div>
+            <div class="panel-ask">
+              <div class="panel-card">
+                <p class="panel-label" data-i18n="mock.waiting">Waiting for approval</p>
+                <p class="ask-tool" data-i18n="mock.ask">Claude wants to use Bash</p>
+                <code>swift test</code>
+                <div class="ask-btns"><span data-i18n="sheet.deny">Deny</span><span class="ask-allow" id="ask-allow" data-i18n="sheet.allow">Allow</span></div>
+              </div>
+            </div>
+            <div class="panel-card">
+              <p class="panel-label" data-i18n="mock.chats">Chats</p>
+              <div class="chat-row"><i class="chat-dot" id="chat-dot"></i><div><b data-i18n="mock.chatTitle">Fix the flaky login test</b><span>~/Developer/weather-app</span></div></div>
+              <div class="chat-row"><i class="chat-dot idle"></i><div><b data-i18n="mock.chat2">Add a dark mode toggle</b><span>~/Developer/portfolio-site</span></div></div>
+            </div>
+            <div class="panel-card">
+              <p class="panel-label" data-i18n="mock.limits">Usage limits</p>
+              <div class="limit"><span>Claude Code</span><i><u style="--w:38%"></u></i><b>38%</b></div>
+              <div class="limit"><span>Codex</span><i><u style="--w:21%"></u></i><b>21%</b></div>
+            </div>
+            <div class="panel-card panel-awake">
+              <div><b data-i18n="mock.awake">Mac stays awake</b><span data-i18n="mock.awakeNote">The display may still turn off.</span></div>
+              <i class="switch on"></i>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+          <span>Claude Code</span><span>Codex</span><span>Gemini CLI</span><span>macOS</span><span>Apple Intelligence</span><span>ntfy</span><span>Tailscale</span><span>iPhone</span><span>iPad</span>
+          <span>Claude Code</span><span>Codex</span><span>Gemini CLI</span><span>macOS</span><span>Apple Intelligence</span><span>ntfy</span><span>Tailscale</span><span>iPhone</span><span>iPad</span>
+        </div>
+      </div>
     </section>
 
-    <!-- Features -->
-    <section class="section" id="features" aria-labelledby="features-title">
+    <!-- 1. The Mac app -->
+    <section class="section" id="mac" aria-labelledby="mac-title">
       <div class="wrap">
-        <header class="section-head">
-          <p class="kicker" data-i18n="features.kicker">Features</p>
-          <h2 id="features-title" data-i18n="features.title">Everything the terminal shows, on the phone in your hand.</h2>
-          <p data-i18n="features.lead">A small menu bar app on the Mac starts and supervises the official command-line tools, keeps the Mac awake and lets you pick any project folder. The iPhone and iPad app is where you follow and steer them.</p>
+        <header class="section-head rv">
+          <p class="kicker" data-i18n="mac.kicker">Remote Code for Mac</p>
+          <h2 id="mac-title" data-i18n="mac.title">Your agents work on your Mac. Remote Code keeps it all together.</h2>
+          <p data-i18n="mac.lead">A small app in your menu bar starts and supervises the official command-line tools, on your own accounts. Click its icon and everything is there.</p>
         </header>
-        <div class="grid">
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1 0 1.5-.7 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5H17a4 4 0 0 0 4-4c0-4.4-4-8.5-9-8.5z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg></div>
-            <h3 data-i18n="f.design.t">A fresh design</h3>
-            <p data-i18n="f.design.d">A brand-new look on iPhone, iPad and Mac. Tool calls, diffs and thinking open in sheets; what the agent is doing shows right inside the message field, with Stop where Send was.</p>
+        <div class="bento">
+          <article class="tile tile-wide rv" data-spot>
+            <div>
+              <h3 data-i18n="m.agents.t">Every agent you have</h3>
+              <p data-i18n="m.agents.d">Remote Code finds Claude Code, Codex and Gemini CLI on the Mac, shows whether each one is signed in, and always offers the models and effort levels your CLI offers.</p>
+            </div>
+            <ul class="agents" aria-hidden="true">
+              <li><i></i><b>Claude Code</b><span data-i18n="m.agents.ok">Signed in</span></li>
+              <li><i></i><b>Codex</b><span data-i18n="m.agents.ok">Signed in</span></li>
+              <li><i></i><b>Gemini CLI</b><span data-i18n="m.agents.ok">Signed in</span></li>
+            </ul>
           </article>
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg></div>
-            <h3 data-i18n="f.media.t">Photos and videos</h3>
-            <p data-i18n="f.media.d">Attach photos from your library or the camera. Videos are sent as a few frames, so your agent can see what you mean.</p>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.chats.t">Follow every chat</h3>
+            <p data-i18n="m.chats.d">See what is running from the menu bar. Open a chat in its own window to watch each step, reply, or stop it.</p>
           </article>
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h4l2-8 4 12 2-6h4"/></svg></div>
-            <h3 data-i18n="f.models.t">Real models and effort</h3>
-            <p data-i18n="f.models.d">Model names and effort levels come straight from Claude Code and Codex on your Mac — always the ones your CLI offers. Change them per chat.</p>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.approve.t">Approve at your desk</h3>
+            <p data-i18n="m.approve.d">Requests wait in the menu with the exact command. Allow or deny there; unanswered ones are denied after 10 minutes.</p>
           </article>
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></svg></div>
-            <h3 data-i18n="f.updates.t">Updates in the Mac app</h3>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.limits.t">Limits at a glance</h3>
+            <p data-i18n="m.limits.d">Claude and Codex usage windows with their reset times, always one click away.</p>
+            <div class="bars" aria-hidden="true"><i style="--w:72%"></i><i style="--w:38%"></i><i style="--w:21%"></i></div>
+          </article>
+          <article class="tile tile-wide rv" data-spot>
+            <div>
+              <h3 data-i18n="m.power.t">A Mac that stays ready</h3>
+              <p data-i18n="m.power.d">The Mac stays awake while Remote Code runs. Keep the display on, or work with the lid closed: the built-in screen goes dark behind the lid, the mode can pause on battery, and it is undone when the app quits.</p>
+            </div>
+            <div class="switches" aria-hidden="true">
+              <div class="switch-row"><span data-i18n="care.p.s1">Keep the display on</span><i class="switch"></i></div>
+              <div class="switch-row"><span data-i18n="care.p.s2">Stay awake with the lid closed</span><i class="switch d1"></i></div>
+              <div class="switch-row"><span data-i18n="care.p.s3">Darken the built-in screen</span><i class="switch d2"></i></div>
+            </div>
+          </article>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="f.sub.t">Sub-agents</h3>
+            <p data-i18n="f.sub.d">Claude can hand a task to Codex or Gemini. Each sub-agent runs on the Mac and can be followed live.</p>
+          </article>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.notify.t">It tells you first</h3>
+            <p data-i18n="m.notify.d">macOS notifications when a task finishes, an approval waits, disk space runs low or memory is almost full.</p>
+          </article>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.week.t">Your week, summarised</h3>
+            <p data-i18n="m.week.d">What you worked on, per project and day, written on the Mac by Apple Intelligence.</p>
+          </article>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="f.updates.t">Updates itself safely</h3>
             <p data-i18n="f.updates.d">Remote Code checks GitHub once a day. Install and Relaunch verifies the checksum, Apple notarization and signature before replacing itself.</p>
           </article>
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg></div>
+          <article class="tile rv" data-spot>
             <h3 data-i18n="f.langs.t">Ten languages</h3>
-            <p data-i18n="f.langs.d">English, Türkçe, Deutsch, Español, Français, Italiano, Português, 日本語, 한국어 and 简体中文 — following your device.</p>
+            <p data-i18n="f.langs.d">English, Türkçe, Deutsch, Español, Français, Italiano, Português, 日本語, 한국어 and 简体中文, following your device.</p>
           </article>
-          <article class="card card-new">
-            <span class="badge" data-i18n="badge.new">New in 1.1</span>
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="19.5" r="1"/></svg></div>
-            <h3 data-i18n="f.local.t">Local network first</h3>
-            <p data-i18n="f.local.d">At home Remote Code talks to your Mac directly over Wi-Fi — nothing else to set up. Tailscale is optional, only for when you are away.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9l3 3-3 3M12 15h5"/></svg></div>
-            <h3 data-i18n="f.agents.t">Claude Code, Codex and Gemini</h3>
-            <p data-i18n="f.agents.d">Pick the agent when you start a chat. Remote Code only lists the CLIs installed on your Mac, and each session shows which agent it runs.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg></div>
-            <h3 data-i18n="f.approve.t">Approve every action</h3>
-            <p data-i18n="f.approve.d">See the diff of an edit or the command to run, then Allow, Deny or always allow it for the session. Unanswered requests are denied after 10 minutes.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>
-            <h3 data-i18n="f.live.t">Live transcript</h3>
-            <p data-i18n="f.live.d">Responses, tool calls, diffs and terminal output as they happen. Reopen any chat from the last 30 days, offline too.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="7" rx="2"/><rect x="13" y="13" width="8" height="7" rx="2"/></svg></div>
-            <h3 data-i18n="f.sub.t">Sub-agents in their own panes</h3>
-            <p data-i18n="f.sub.d">Claude can hand tasks to Codex or Gemini. Follow every sub-agent live in its own transcript and approve its actions.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg></div>
-            <h3 data-i18n="f.notify.t">Notifications with ntfy</h3>
-            <p data-i18n="f.notify.d">Get a ping when a turn finishes or an approval is waiting, through <a href="https://ntfy.sh" rel="noopener">ntfy</a> or your own server. By default it only says “Task finished · folder name”.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></div>
-            <h3 data-i18n="f.demo.t">Try the Demo first</h3>
-            <p data-i18n="f.demo.d">The iPhone app includes a simulated Mac, so you can try everything before installing anything on your Mac — no account needed.</p>
+          <article class="tile rv" data-spot>
+            <h3 data-i18n="m.private.t">Yours alone</h3>
+            <p data-i18n="m.private.d">Your CLIs do the AI work with your accounts. Remote Code has no server, no account and no telemetry.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <!-- How it works -->
-    <section class="section section-alt" id="how" aria-labelledby="how-title">
+    <!-- 2. iPhone and iPad -->
+    <section class="section story" id="iphone" aria-labelledby="iphone-title">
       <div class="wrap">
-        <header class="section-head">
-          <p class="kicker" data-i18n="how.kicker">How it works</p>
+        <header class="section-head rv">
+          <p class="kicker" data-i18n="story.kicker">Remote Code for iPhone &amp; iPad</p>
+          <h2 id="iphone-title" data-i18n="story.title">Leaving your desk? Take it with you.</h2>
+          <p data-i18n="story.lead">Pair your iPhone or iPad with the Mac app. The agents keep running on the Mac; the phone is your window into them, end-to-end encrypted.</p>
+        </header>
+        <div class="story-grid">
+          <div class="story-stage">
+            <div class="phone phone-story">
+              <div class="phone-screen">
+                <img class="story-img is-on" data-step-img="0" data-shot="home" src="assets/shots/home-en.webp" width="402" height="874" alt="" loading="lazy">
+                <img class="story-img" data-step-img="1" data-shot="chat" src="assets/shots/chat-en.webp" width="402" height="874" alt="" loading="lazy">
+                <img class="story-img" data-step-img="2" data-shot="storage" src="assets/shots/storage-en.webp" width="402" height="874" alt="" loading="lazy">
+                <img class="story-img" data-step-img="3" data-shot="activity" src="assets/shots/activity-en.webp" width="402" height="874" alt="" loading="lazy">
+                <div class="sheet" id="sheet" aria-hidden="true">
+                  <div class="sheet-grip"></div>
+                  <p class="sheet-title" data-i18n="mock.ask">Claude wants to use Bash</p>
+                  <code class="sheet-cmd">swift test --filter LoginTests</code>
+                  <p class="sheet-timer" data-i18n="sheet.timer">Denied automatically in 9:58</p>
+                  <div class="sheet-btns">
+                    <span class="sheet-btn" data-i18n="sheet.deny">Deny</span>
+                    <span class="sheet-btn sheet-allow" data-i18n="sheet.allow">Allow</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <ol class="story-steps">
+            <li class="story-step" data-step="0">
+              <h3 data-i18n="story.s1.t">Start a chat anywhere</h3>
+              <p data-i18n="story.s1.d">Pick any project folder and any agent on the Mac, right from the phone. Your chats and your week are one tap away.</p>
+            </li>
+            <li class="story-step" data-step="1">
+              <h3 data-i18n="story.s2.t">Follow it live</h3>
+              <p data-i18n="story.s2.d">Replies, tool calls, diffs and terminal output as they happen. Reopen any chat from the last 30 days, offline too.</p>
+            </li>
+            <li class="story-step" data-step="2">
+              <h3 data-i18n="story.s3.t">Approve from your pocket</h3>
+              <p data-i18n="story.s3.d">See the edit or the command, then Allow, Deny or always allow it for the session.</p>
+            </li>
+            <li class="story-step" data-step="3">
+              <h3 data-i18n="story.s4.t">Free up space on the Mac</h3>
+              <p data-i18n="story.s4.d">See the free space and clean up caches, logs, Xcode data, package caches and the Trash. The phone can only pick from the Mac's own list, and items go to the Trash first.</p>
+            </li>
+            <li class="story-step" data-step="4">
+              <h3 data-i18n="story.s5.t">See why it is slow</h3>
+              <p data-i18n="story.s5.d">Memory pressure, processor load and the apps behind them. Swipe to quit the one causing it.</p>
+            </li>
+          </ol>
+        </div>
+        <ul class="pills rv">
+          <li data-i18n="i.skills">Skills and slash commands</li>
+          <li data-i18n="i.models">Model and effort per chat</li>
+          <li data-i18n="i.media">Photos and videos</li>
+          <li data-i18n="i.local">Wi-Fi first, Tailscale when away</li>
+          <li data-i18n="i.notify">Notifications through ntfy</li>
+          <li data-i18n="i.demo">A demo Mac to try it first</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Plugins -->
+    <section class="section plugins" id="plugins" aria-labelledby="plugins-title">
+      <div class="wrap">
+        <header class="section-head rv">
+          <p class="kicker" data-i18n="plugins.kicker">Plugins</p>
+          <h2 id="plugins-title" data-i18n="plugins.title">Room for more.</h2>
+          <p data-i18n="plugins.lead">A tool on the Mac can also become a tab on your phone, over the same encrypted connection. Two free ones so far.</p>
+        </header>
+        <div class="plugin-grid">
+          <article class="plugin rv" data-spot>
+            <img src="assets/plugins/vitrin-logo.svg" width="52" height="52" alt="">
+            <h3>Vitrin</h3>
+            <p data-i18n="vitrin.lead">App Store listings built from your code: text, screenshots and previews, plus App Store Connect. Settings → Plugins on the Mac installs it.</p>
+            <a class="link-arrow" href="https://vitrin.ardasnturk.com" rel="noopener"><span data-i18n="vitrin.more">Explore Vitrin</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+          <article class="plugin rv" data-spot>
+            <img src="assets/plugins/promo-icon.png" width="52" height="52" alt="">
+            <h3>Promo Studio</h3>
+            <p data-i18n="promo.lead">Promo videos and Instagram posts for your apps, directed by Claude Code. The tab appears when Promo Studio runs on the Mac.</p>
+            <a class="link-arrow" href="https://promo.ardasnturk.com" rel="noopener"><span data-i18n="promo.more">Explore Promo Studio</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Setup -->
+    <section class="section setup" id="how" aria-labelledby="how-title">
+      <div class="wrap">
+        <header class="section-head rv">
+          <p class="kicker" data-i18n="how.kicker">Setup</p>
           <h2 id="how-title" data-i18n="how.title">Up and running in three steps.</h2>
         </header>
-        <ol class="steps">
-          <li class="step">
+        <ol class="steps" id="steps">
+          <li class="step rv">
             <span class="step-num">1</span>
             <h3 data-i18n="how.s1.t">Install the Mac app</h3>
             <p data-i18n="how.s1.d">Download the notarized DMG, drag Remote Code to Applications and open it. A <code>&gt;_</code> icon appears in the menu bar; if Claude Code is missing or not signed in, it shows what to do.</p>
           </li>
-          <li class="step">
+          <li class="step rv">
             <span class="step-num">2</span>
-            <h3 data-i18n="how.s2.t">Install the iPhone app</h3>
-            <p data-i18n="how.s2.d">Install Remote Code on your iPhone or iPad through TestFlight (see below). No Mac yet? Try the Demo inside the app.</p>
+            <h3 data-i18n="how.s2.t">Add your iPhone</h3>
+            <p data-i18n="how.s2.d">Optional: install Remote Code on your iPhone or iPad through TestFlight (see below). The Demo inside the app needs no Mac.</p>
           </li>
-          <li class="step">
+          <li class="step rv">
             <span class="step-num">3</span>
             <h3 data-i18n="how.s3.t">Pair on the same Wi-Fi</h3>
             <p data-i18n="how.s3.d">Click the <code>&gt;_</code> icon, choose <b>Pair iPhone or iPad…</b> and scan the code with the phone. Allow Local Network when iOS asks. Both screens show the same verification code — done.</p>
@@ -189,32 +370,74 @@
       </div>
     </section>
 
-    <!-- Download -->
-    <section class="section" id="download" aria-labelledby="download-title">
+    <!-- Security -->
+    <section class="section security" id="security" aria-labelledby="security-title">
       <div class="wrap">
-        <header class="section-head">
-          <p class="kicker" data-i18n="dl.kicker">Download</p>
+        <header class="section-head rv">
+          <p class="kicker" data-i18n="sec.kicker">Security &amp; privacy</p>
+          <h2 id="security-title" data-i18n="sec.title">Only your devices. Nothing in between.</h2>
+          <p data-i18n="sec.lead">Remote Code never talks to Anthropic or any other AI provider and never touches your credentials: your own CLI does all the AI work, signed in with your own account. There is no server, no account and no telemetry.</p>
+        </header>
+        <div class="tunnel rv" aria-hidden="true">
+          <span class="tunnel-end">iPhone</span>
+          <div class="tunnel-line"><i></i><i></i><i></i><b>ChaCha20-Poly1305</b></div>
+          <span class="tunnel-end">Mac</span>
+        </div>
+        <div class="sec-grid">
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.pair.t">Pairing</h3>
+            <p data-i18n="sec.pair.d">The QR code holds the Mac's public key and a one-time token, valid for 5 minutes. Only the holder of the matching private key can complete the handshake.</p>
+          </div>
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.conn.t">Every connection</h3>
+            <p data-i18n="sec.conn.d"><code>Noise_IK_25519_ChaChaPoly_SHA256</code>: mutual authentication with pinned X25519 keys, fresh session keys, ChaCha20-Poly1305, replays rejected.</p>
+          </div>
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.files.t">Files</h3>
+            <p data-i18n="sec.files.d">The phone can only browse and start sessions inside your home folder; paths are normalised and symlinks resolved before the check.</p>
+          </div>
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.appr.t">Approvals</h3>
+            <p data-i18n="sec.appr.d">The CLI's own permission system stays in charge. Remote Code forwards its prompts through a localhost-only endpoint protected by a per-session token.</p>
+          </div>
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.cred.t">Credentials</h3>
+            <p data-i18n="sec.cred.d">Remote Code never reads, stores or transmits your Claude login. An optional API key is kept in the Keychain.</p>
+          </div>
+          <div class="sec-item rv">
+            <h3 data-i18n="sec.data.t">Data</h3>
+            <p data-i18n="sec.data.d">Session logs on the Mac (mode 0600, deleted after 30 days), a cache on the phone, keys in the Keychain. Notifications are off unless you turn them on and choose the ntfy server.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section class="section download" id="download" aria-labelledby="download-title">
+      <div class="aurora aurora-soft" aria-hidden="true"><i></i><i></i></div>
+      <div class="wrap">
+        <header class="section-head center rv">
+          <img class="dl-icon" src="assets/icon-512.png" width="96" height="96" alt="">
           <h2 id="download-title" data-i18n="dl.title">Get Remote Code.</h2>
+          <p data-i18n="dl.lead">Free and open source. Start with the Mac app; add the iPhone app whenever you like.</p>
         </header>
         <div class="dl-grid">
-          <div class="dl-card">
+          <div class="dl-card rv">
             <div class="dl-head">
               <h3 data-i18n="dl.mac.t">Remote Code for Mac</h3>
               <p class="muted" data-i18n="dl.mac.req">macOS 15 Sequoia or later · Apple silicon or Intel</p>
             </div>
             <a class="btn btn-primary btn-block" id="dmg-link" href="https://github.com/ardasnturk/remote-code/releases/latest">
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="i-dl"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>
+              <svg viewBox="0 0 24 24" aria-hidden="true" class="i-apple"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.1 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.6-2.8 1.4-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.5 2.8-1.3z"/></svg>
               <span data-i18n="dl.mac.btn">Download for Mac</span>
             </a>
-            <p class="dl-meta muted" id="dmg-meta" aria-live="polite"><span data-i18n="dl.mac.meta">Signed with Developer ID and notarized by Apple.</span> <span id="dmg-version"></span></p>
+            <p class="dl-meta muted" aria-live="polite"><span data-i18n="dl.mac.meta">Signed with Developer ID and notarized by Apple.</span> <span id="dmg-version"></span></p>
             <div class="dl-label-row">
               <p class="dl-label" data-i18n="dl.brew">Or with Homebrew:</p>
               <button type="button" class="copy-btn" data-copy="brew-cmd" data-i18n="copy">Copy</button>
             </div>
-            <div class="code-block">
-              <pre><code id="brew-cmd">brew tap ardasnturk/remote-code https://github.com/ardasnturk/remote-code
-brew install --cask remote-code</code></pre>
-            </div>
+            <div class="code-block"><pre><code id="brew-cmd">brew tap ardasnturk/remote-code https://github.com/ardasnturk/remote-code
+brew install --cask remote-code</code></pre></div>
             <p class="small muted"><span data-i18n="dl.mac.cli">Needs at least one of the official CLIs, installed and signed in with your own account:</span>
               <a href="https://docs.claude.com/en/docs/claude-code/setup" rel="noopener">Claude Code</a>,
               <a href="https://github.com/openai/codex" rel="noopener">Codex</a>,
@@ -222,7 +445,7 @@ brew install --cask remote-code</code></pre>
             </p>
           </div>
 
-          <div class="dl-card" id="iphone">
+          <div class="dl-card rv" id="get-iphone">
             <div class="dl-head">
               <h3 data-i18n="dl.ios.t">Remote Code for iPhone &amp; iPad</h3>
               <p class="muted" data-i18n="dl.ios.req">iOS / iPadOS 18 or later · via TestFlight</p>
@@ -235,9 +458,7 @@ brew install --cask remote-code</code></pre>
               <div class="qr" id="tf-qr" role="img" aria-label="QR code for the TestFlight link" data-i18n-attr="aria-label:dl.ios.qrAlt"></div>
               <div>
                 <p data-i18n="dl.ios.scan">Scan with your iPhone camera, or open the link on the device:</p>
-                <a class="btn btn-ghost" id="tf-link" href="#" rel="noopener">
-                  <span data-i18n="dl.ios.btn">Open in TestFlight</span>
-                </a>
+                <a class="btn btn-ghost" id="tf-link" href="#" rel="noopener"><span data-i18n="dl.ios.btn">Open in TestFlight</span></a>
               </div>
             </div>
             <p class="small muted" data-i18n="dl.ios.note">TestFlight is Apple's free app for beta apps; if it is not installed yet, the link takes you to it first.</p>
@@ -246,51 +467,18 @@ brew install --cask remote-code</code></pre>
       </div>
     </section>
 
-    <!-- Security -->
-    <section class="section section-alt" id="security" aria-labelledby="security-title">
-      <div class="wrap">
-        <header class="section-head">
-          <p class="kicker" data-i18n="sec.kicker">Security &amp; privacy</p>
-          <h2 id="security-title" data-i18n="sec.title">Only your devices. Nothing in between.</h2>
-          <p data-i18n="sec.lead">Remote Code never talks to Anthropic or any other AI provider and never touches your credentials: your own CLI does all the AI work, signed in with your own account. There is no server, no account and no telemetry.</p>
-        </header>
-        <div class="sec-grid">
-          <div class="sec-item">
-            <h3 data-i18n="sec.pair.t">Pairing</h3>
-            <p data-i18n="sec.pair.d">The QR code holds the Mac's public key and a one-time token, valid for 5 minutes. Only the holder of the matching private key can complete the handshake.</p>
-          </div>
-          <div class="sec-item">
-            <h3 data-i18n="sec.conn.t">Every connection</h3>
-            <p data-i18n="sec.conn.d"><code>Noise_IK_25519_ChaChaPoly_SHA256</code>: mutual authentication with pinned X25519 keys, fresh session keys, ChaCha20-Poly1305, replays rejected.</p>
-          </div>
-          <div class="sec-item">
-            <h3 data-i18n="sec.files.t">Files</h3>
-            <p data-i18n="sec.files.d">The phone can only browse and start sessions inside your home folder; paths are normalised and symlinks resolved before the check.</p>
-          </div>
-          <div class="sec-item">
-            <h3 data-i18n="sec.appr.t">Approvals</h3>
-            <p data-i18n="sec.appr.d">The CLI's own permission system stays in charge. Remote Code forwards its prompts through a localhost-only endpoint protected by a per-session token.</p>
-          </div>
-          <div class="sec-item">
-            <h3 data-i18n="sec.cred.t">Credentials</h3>
-            <p data-i18n="sec.cred.d">Remote Code never reads, stores or transmits your Claude login. An optional API key is kept in the Keychain.</p>
-          </div>
-          <div class="sec-item">
-            <h3 data-i18n="sec.data.t">Data</h3>
-            <p data-i18n="sec.data.d">Session logs on the Mac (mode 0600, deleted after 30 days), a cache on the phone, keys in the Keychain. Notifications are off unless you turn them on and choose the ntfy server.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- FAQ -->
     <section class="section" id="faq" aria-labelledby="faq-title">
       <div class="wrap wrap-narrow">
-        <header class="section-head">
+        <header class="section-head rv">
           <p class="kicker" data-i18n="faq.kicker">FAQ</p>
           <h2 id="faq-title" data-i18n="faq.title">Questions &amp; answers</h2>
         </header>
-        <div class="faq">
+        <div class="faq rv">
+          <details>
+            <summary data-i18n="faq.q9">What do I need for the plugins?</summary>
+            <p data-i18n="faq.a9">Remote Code 1.6 on the Mac and the phone. For Vitrin you also need Vitrin 2.1 on the Mac; Settings → Plugins installs it and the Vitrin app doesn't need to be open. The Promo Studio tab appears when Promo Studio runs on the Mac. Both are free.</p>
+          </details>
           <details>
             <summary data-i18n="faq.q0">The phone says “Offline” at home. What now?</summary>
             <p data-i18n="faq.a0">Check that Remote Code is running on the Mac (<code>&gt;_</code> icon in the menu bar), that both devices are on the same Wi-Fi — guest networks often keep devices apart — and that Local Network is on for Remote Code in iOS Settings → Privacy &amp; Security.</p>
@@ -340,6 +528,9 @@ brew install --cask remote-code</code></pre>
           <span>Remote Code</span>
         </a>
         <nav class="footer-links" aria-label="Footer" data-i18n-attr="aria-label:footer.label">
+          <a href="https://vitrin.ardasnturk.com" rel="noopener">Vitrin</a>
+          <a href="https://promo.ardasnturk.com" rel="noopener">Promo Studio</a>
+          <a id="source-link" href="https://github.com/ardasnturk/remote-code" rel="noopener">GitHub</a>
           <a id="releases-link" href="https://github.com/ardasnturk/remote-code/releases" data-i18n="footer.releases">Releases</a>
           <a id="issues-link" href="https://github.com/ardasnturk/remote-code/issues" data-i18n="footer.issues">Issues</a>
         </nav>
@@ -351,7 +542,6 @@ brew install --cask remote-code</code></pre>
   </footer>
 
   <script src="vendor/qrcode.min.js"></script>
-  <script src="i18n.js"></script>
   <script src="main.js"></script>
 </body>
 </html>

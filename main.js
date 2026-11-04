@@ -1,4 +1,4 @@
-// Remote Code website — language, theme, latest DMG, TestFlight QR, copy buttons.
+// Remote Code website — language, theme, latest DMG, TestFlight QR, copy buttons, motion.
 (function () {
   'use strict';
 
@@ -13,6 +13,7 @@
   // --------------------------------------------------------------------------
 
   var RELEASES_URL = 'https://github.com/' + REPO + '/releases';
+  var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   var store = {
     get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -23,6 +24,7 @@
   var dynamicEn = { 'dl.mac.version': 'Latest: {v}', 'copied': 'Copied' };
   var en = {};
   var lang = 'en';
+  var select = document.getElementById('lang-select');
 
   document.querySelectorAll('[data-i18n]').forEach(function (el) {
     en[el.getAttribute('data-i18n')] = el.innerHTML;
@@ -42,11 +44,36 @@
     return dict[key] != null ? dict[key] : en[key];
   }
 
+  // Wraps the words of the headline so they can rise in one after the other.
+  function splitWords(el) {
+    var i = 0;
+    function wrap(node) {
+      Array.prototype.slice.call(node.childNodes).forEach(function (child) {
+        if (child.nodeType === 1) { wrap(child); return; }
+        if (child.nodeType !== 3) return;
+        var frag = document.createDocumentFragment();
+        child.textContent.split(/(\s+)/).forEach(function (part) {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(' ')); return; }
+          var span = document.createElement('span');
+          span.className = 'word';
+          span.style.setProperty('--i', i++);
+          span.textContent = part;
+          frag.appendChild(span);
+        });
+        node.replaceChild(frag, child);
+      });
+    }
+    wrap(el);
+  }
+
   function applyLang(next) {
     lang = window.PH_STRINGS[next] || next === 'en' ? next : 'en';
     document.documentElement.lang = lang;
+    select.value = lang;
     document.querySelectorAll('[data-i18n]').forEach(function (el) {
       el.innerHTML = t(el.getAttribute('data-i18n'));
+      if (el.hasAttribute('data-split')) splitWords(el);
     });
     document.querySelectorAll('[data-i18n-attr]').forEach(function (el) {
       el.getAttribute('data-i18n-attr').split(';').forEach(function (pair) {
@@ -54,32 +81,31 @@
         el.setAttribute(p[0], t(p[1]));
       });
     });
+    // App screenshots exist in both languages.
+    document.querySelectorAll('[data-shot]').forEach(function (img) {
+      img.src = 'assets/shots/' + img.getAttribute('data-shot') + '-' + lang + '.webp';
+    });
     document.title = t('meta.title');
     document.querySelector('meta[name="description"]').content = t('meta.description');
-    document.querySelectorAll('[data-lang]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(b.getAttribute('data-lang') === lang));
-    });
     renderVersion();
   }
 
-  function initialLang() {
-    var q = new URLSearchParams(location.search).get('lang');
-    if (q === 'en' || q === 'tr') return q;
-    var saved = store.get('ph-lang');
-    if (saved === 'en' || saved === 'tr') return saved;
-    var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-    return /^tr\b/i.test(nav) ? 'tr' : 'en';
+  // Other languages load on demand; the first one was chosen in <head>.
+  function loadLang(next, done) {
+    if (next === 'en' || window.PH_STRINGS[next]) { done(); return; }
+    var script = document.createElement('script');
+    script.src = 'i18n/' + next + '.js';
+    script.onload = done;
+    document.head.appendChild(script);
   }
 
-  document.querySelectorAll('[data-lang]').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var l = b.getAttribute('data-lang');
-      store.set('ph-lang', l);
-      // Keep a ?lang= in the address bar in step, so reloads and shared links match.
-      var url = new URL(location.href);
-      if (url.searchParams.has('lang')) { url.searchParams.set('lang', l); history.replaceState(null, '', url); }
-      applyLang(l);
-    });
+  select.addEventListener('change', function () {
+    var next = select.value;
+    store.set('ph-lang', next);
+    // Keep a ?lang= in the address bar in step, so reloads and shared links match.
+    var url = new URL(location.href);
+    if (url.searchParams.has('lang')) { url.searchParams.set('lang', next); history.replaceState(null, '', url); }
+    loadLang(next, function () { applyLang(next); });
   });
 
   // ---- Theme ---------------------------------------------------------------
@@ -96,13 +122,14 @@
   // ---- Repository links & Homebrew ----------------------------------------
   document.getElementById('releases-link').href = RELEASES_URL;
   document.getElementById('issues-link').href = 'https://github.com/' + REPO + '/issues';
+  document.getElementById('source-link').href = 'https://github.com/' + REPO;
   document.getElementById('brew-cmd').textContent =
     'brew tap ' + REPO.split('/')[0] + '/remote-code https://github.com/' + REPO + '\n' +
     'brew install --cask remote-code';
 
   // ---- Latest DMG ----------------------------------------------------------
   var dmgLink = document.getElementById('dmg-link');
-  var heroMac = document.querySelector('.hero .btn-primary');
+  var heroMac = document.getElementById('hero-mac');
   var latestVersion = null;
   dmgLink.href = RELEASES_URL + '/latest';
 
@@ -158,5 +185,174 @@
     });
   });
 
-  applyLang(initialLang());
+  applyLang(window.PH_LANG);
+
+  // ---- Reveal on scroll ----------------------------------------------------
+  var reveals = document.querySelectorAll('.rv');
+  if ('IntersectionObserver' in window && !calm) {
+    var revealer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.classList.add('in');
+        revealer.unobserve(e.target);
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: .08 });
+    reveals.forEach(function (el) {
+      // Neighbours in a row arrive one after the other.
+      var siblings = Array.prototype.filter.call(el.parentNode.children, function (c) { return c.classList.contains('rv'); });
+      el.style.setProperty('--d', Math.min(siblings.indexOf(el), 5) * 70 + 'ms');
+      revealer.observe(el);
+    });
+  } else {
+    reveals.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  // ---- Scroll: progress bar, nav, setup line ---------------------
+  var nav = document.querySelector('.nav');
+  var bar = document.getElementById('progress');
+  var steps = document.getElementById('steps');
+  var ticking = false;
+
+  function onScroll() {
+    ticking = false;
+    var y = window.scrollY;
+    var vh = window.innerHeight;
+    var max = document.documentElement.scrollHeight - vh;
+    bar.style.transform = 'scaleX(' + (max > 0 ? y / max : 0) + ')';
+    nav.classList.toggle('scrolled', y > 24);
+    var box = steps.getBoundingClientRect();
+    var p = Math.min(1, Math.max(0, (vh * .85 - box.top) / (vh * .55)));
+    steps.style.setProperty('--p', calm ? 1 : p);
+  }
+  function requestScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(onScroll);
+  }
+  window.addEventListener('scroll', requestScroll, { passive: true });
+  window.addEventListener('resize', requestScroll);
+  onScroll();
+
+  // ---- iPhone story: the phone follows the step in the middle of the screen -
+  var storySteps = document.querySelectorAll('.story-step');
+  var storyImgs = document.querySelectorAll('.story-img');
+  var sheet = document.getElementById('sheet');
+  // Step → screen; step 2 (approve) plays over the chat.
+  var stepScreens = [0, 1, 1, 2, 3];
+
+  function showStep(i) {
+    storySteps.forEach(function (s, n) { s.classList.toggle('is-on', n === i); });
+    storyImgs.forEach(function (img, n) { img.classList.toggle('is-on', n === stepScreens[i]); });
+    sheet.classList.toggle('on', i === 2);
+  }
+  if ('IntersectionObserver' in window) {
+    var storyObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) showStep(Number(e.target.getAttribute('data-step')));
+      });
+    }, { rootMargin: '-46% 0px -46% 0px' });
+    storySteps.forEach(function (s) { storyObserver.observe(s); });
+  }
+  showStep(0);
+
+  // ---- The Mac desk leans towards the pointer -----------------------------
+  var desk = document.getElementById('desk');
+  if (!calm && window.matchMedia('(hover: hover)').matches) {
+    document.querySelector('.hero').addEventListener('pointermove', function (e) {
+      var r = desk.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width - .5;
+      var y = (e.clientY - r.top) / r.height - .5;
+      desk.style.setProperty('--ry', (-5 + x * 7).toFixed(2) + 'deg');
+      desk.style.setProperty('--rx', (2 - y * 5).toFixed(2) + 'deg');
+    });
+  }
+
+  // ---- Spotlight on the tiles -----------------------------------------------
+  document.querySelectorAll('[data-spot]').forEach(function (el) {
+    el.addEventListener('pointermove', function (e) {
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--x', e.clientX - r.left + 'px');
+      el.style.setProperty('--y', e.clientY - r.top + 'px');
+    });
+  });
+
+  // ---- A scripted session in the Mac desk ----------------------------------
+  // The same demo session the iPhone app shows: a flaky test, an approval, a pass.
+  var term = document.getElementById('term');
+  var panel = document.getElementById('panel');
+  var allow = document.getElementById('ask-allow');
+  var working = document.getElementById('stat-working');
+  var chatDot = document.getElementById('chat-dot');
+  var script = [
+    ['dim', '$ claude'],
+    ['', '> LoginTests fails about once'],
+    ['', '  in five runs. Find out why.'],
+    ['tool', '● Read  LoginTests.swift'],
+    ['tool', '● Edit  RetryPolicy.swift'],
+    ['ok', '  ✓ +1 −0'],
+    ['wait', '● Run   swift test'],
+    ['ok', '  ✓ passes 50 runs in a row']
+  ];
+  var approvalLine = 6;
+
+  function setBusy(busy) {
+    working.textContent = busy ? '1' : '0';
+    chatDot.classList.toggle('busy', busy);
+  }
+
+  function renderTerm(lines, partial) {
+    term.textContent = '';
+    lines.forEach(function (line, n) {
+      var span = document.createElement('span');
+      span.className = line[0];
+      span.textContent = n === lines.length - 1 && partial != null ? line[1].slice(0, partial) : line[1];
+      term.appendChild(span);
+      if (n < lines.length - 1) term.appendChild(document.createTextNode('\n'));
+    });
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    term.appendChild(cursor);
+  }
+
+  if (calm) {
+    renderTerm(script);
+    setBusy(true);
+    panel.classList.add('asking');
+  } else {
+    var line = 0, ch = 0;
+    var typing = function () {
+      // Don't work while nobody can see it.
+      if (document.hidden || window.scrollY > window.innerHeight) { setTimeout(typing, 700); return; }
+      if (line === 0 && ch === 0) { setBusy(true); }
+      var current = script.slice(0, line + 1);
+      renderTerm(current, ch);
+      var text = script[line][1];
+      if (ch < text.length) {
+        ch += 2;
+        setTimeout(typing, 26);
+        return;
+      }
+      renderTerm(current);
+      var finished = line;
+      line++;
+      ch = 0;
+      if (finished === approvalLine) {
+        // The menu asks, the Allow button gets pressed, the turn goes on.
+        panel.classList.add('asking');
+        setTimeout(function () { allow.classList.add('press'); }, 2300);
+        setTimeout(function () {
+          allow.classList.remove('press');
+          panel.classList.remove('asking');
+          setTimeout(typing, 500);
+        }, 2600);
+        return;
+      }
+      if (line < script.length) { setTimeout(typing, 380); return; }
+      setBusy(false);
+      line = 0;
+      setTimeout(typing, 4200);
+    };
+    setBusy(true);
+    typing();
+  }
 })();
