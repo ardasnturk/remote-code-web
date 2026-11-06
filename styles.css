@@ -370,14 +370,15 @@ h3 { font-size: 22px; line-height: 1.25; letter-spacing: -.015em; font-weight: 6
 @keyframes sw-dot { 0%, 12% { transform: none; } 22%, 86% { transform: translateX(17px); } 96%, 100% { transform: none; } }
 
 /* ---- Plugins ---- */
-.plugin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.plugin { position: relative; padding: 26px; border-radius: 22px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; transition: transform .3s var(--ease); }
+.plugin-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.plugin { position: relative; display: flex; flex-direction: column; padding: 20px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; transition: transform .3s var(--ease); }
 .plugin:hover { transform: translateY(-3px); }
 .plugin::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .3s; pointer-events: none; background: radial-gradient(320px circle at var(--x, 50%) var(--y, 50%), rgba(111, 123, 255, .18), transparent 70%); }
 .plugin:hover::before { opacity: 1; }
-.plugin img { width: 52px; height: 52px; border-radius: 12px; margin-bottom: 14px; }
-.plugin h3 { margin-bottom: 6px; }
-.plugin p { color: var(--muted); font-size: 15.5px; }
+.plugin img { width: 44px; height: 44px; border-radius: 11px; margin-bottom: 12px; }
+.plugin h3 { font-size: 18px; margin-bottom: 6px; }
+.plugin p { color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.plugin .link-arrow { margin-top: auto; padding-top: 12px; font-size: 14.5px; }
 .link-arrow { position: relative; display: inline-flex; align-items: center; gap: 8px; margin-top: 16px; font-weight: 650; text-decoration: none; }
 .link-arrow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .25s var(--ease); }
 .link-arrow:hover svg { transform: translateX(5px); }
@@ -474,6 +475,7 @@ h3 { font-size: 22px; line-height: 1.25; letter-spacing: -.015em; font-weight: 6
   .desk { width: 100%; max-width: 680px; margin-inline: auto; }
   .bento, .sec-grid { grid-template-columns: repeat(2, 1fr); }
   .tile-wide { grid-column: span 2; }
+  .plugin-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   body { font-size: 16px; }

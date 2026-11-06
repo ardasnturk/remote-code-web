@@ -52,7 +52,7 @@ python3 -m http.server 8000
 
 Open <http://localhost:8000>.
 
-The icons come from the app repository (`docs/icon.png`) and the plugin logos
+The icons come from the app repository (`docs/icon.png`) and the extension logos
 from their sites — never edit them here:
 
 ```bash
